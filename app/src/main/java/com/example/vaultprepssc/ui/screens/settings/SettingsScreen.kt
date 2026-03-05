@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.vaultprepssc.ui.screens.settings.SettingsViewModel
 import androidx.compose.ui.Alignment
