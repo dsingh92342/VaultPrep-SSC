@@ -23,7 +23,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.vaultprepssc.ui.navigation.Screen
 import com.example.vaultprepssc.ui.screens.dashboard.DashboardScreen
+import com.example.vaultprepssc.ui.screens.library.LibraryScreen
+import com.example.vaultprepssc.ui.screens.analytics.AnalyticsScreen
+import com.example.vaultprepssc.ui.screens.settings.SettingsScreen
+import com.example.vaultprepssc.ui.screens.exam.ExamScreen
 import com.example.vaultprepssc.ui.theme.VaultPrepSSCTheme
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -84,7 +90,7 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Library.route) {
                             LibraryScreen(
                                 onNavigateBack = { navController.navigateUp() },
-                                onQuestionClick = { questionId -> 
+                                onQuestionClick = { _ -> 
                                     // Navigate to single question view or start session
                                 }
                             )

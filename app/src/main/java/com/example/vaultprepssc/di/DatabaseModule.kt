@@ -1,19 +1,15 @@
 package com.example.vaultprepssc.di
 
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-
 import android.content.Context
 import androidx.room.Room
 import com.example.vaultprepssc.data.local.VaultDatabase
 import com.example.vaultprepssc.data.local.dao.VaultDao
 import com.example.vaultprepssc.util.Constants
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 import javax.inject.Singleton

@@ -1,5 +1,4 @@
 package com.example.vaultprepssc.ui.screens.exam
-
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -13,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.example.vaultprepssc.data.local.entity.UserAttempt
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,6 +37,16 @@ class ExamViewModel @Inject constructor(
     init {
         loadQuestions()
         startTimer()
+    }
+
+    private fun startTimer() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                _timerSeconds.value = (_timerSeconds.value - 1).coerceAtLeast(0)
+            }
+        }
     }
 
     private val _selectedOption = mutableStateOf<Int?>(null)
