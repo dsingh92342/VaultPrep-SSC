@@ -60,8 +60,8 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     // SQLCipher
-    implementation(libs.sqlcipher-android)
-    implementation(libs.sqlite-ktx)
+    implementation(libs.sqlcipher.android)
+    implementation(libs.sqlite.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
