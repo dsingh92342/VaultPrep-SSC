@@ -10,14 +10,21 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.example.vaultprepssc.data.local.entity.TestSession
 import com.example.vaultprepssc.data.local.entity.UserAttempt
+import com.example.vaultprepssc.util.MockGenerator
 import javax.inject.Inject
 
 @HiltViewModel
 class ExamViewModel @Inject constructor(
     private val repository: QuestionRepository,
+    private val mockGenerator: MockGenerator,
+    private val focusModeManager: com.example.vaultprepssc.util.FocusModeManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -28,6 +35,9 @@ class ExamViewModel @Inject constructor(
 
     private val _currentQuestionIndex = mutableStateOf(0)
     val currentQuestionIndex: State<Int> = _currentQuestionIndex
+    
+    val isFocusMode = focusModeManager.isOffline
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     private val _timerSeconds = MutableStateFlow(3600L) // 60 minutes default
     val timerSeconds = _timerSeconds.asStateFlow()
@@ -54,9 +64,35 @@ class ExamViewModel @Inject constructor(
 
     private fun loadQuestions() {
         viewModelScope.launch {
-            repository.getRandomQuestions(100).collect {
-                _questions.value = it
+            if (testId.startsWith("mock_")) {
+                _questions.value = mockGenerator.generateFullMock()
+            } else {
+                repository.getRandomQuestions(25).collect {
+                    _questions.value = it
+                }
             }
+        }
+    }
+    
+    fun submitExam(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            // In a real app, we'd calculate score from attempts
+            // For now, let's create a simulated session result
+            val attempts: List<UserAttempt> = repository.getAttemptsForSession(testId).first()
+            val score = attempts.count { it.isCorrect }
+            
+            repository.saveSession(
+                TestSession(
+                    id = testId,
+                    testName = if (testId.startsWith("mock_")) "Full Mock Test" else "Topic Practice",
+                    score = score,
+                    totalQuestions = _questions.value.size,
+                    timestamp = System.currentTimeMillis(),
+                    isFocusModeActive = focusModeManager.isOffline.value,
+                    sessionType = if (testId.startsWith("mock_")) "MOCK" else "DRILL"
+                )
+            )
+            onComplete()
         }
     }
 

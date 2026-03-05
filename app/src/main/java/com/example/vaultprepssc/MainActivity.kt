@@ -27,6 +27,8 @@ import com.example.vaultprepssc.ui.screens.library.LibraryScreen
 import com.example.vaultprepssc.ui.screens.analytics.AnalyticsScreen
 import com.example.vaultprepssc.ui.screens.settings.SettingsScreen
 import com.example.vaultprepssc.ui.screens.exam.ExamScreen
+import com.example.vaultprepssc.ui.screens.mistakes.MistakeVaultScreen
+import com.example.vaultprepssc.ui.screens.flashcards.FlashcardScreen
 import com.example.vaultprepssc.ui.theme.VaultPrepSSCTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
@@ -84,7 +86,12 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Dashboard.route) {
                             DashboardScreen(
                                 onNavigateToLibrary = { navController.navigate(Screen.Library.route) },
-                                onStartMock = { navController.navigate(Screen.Exam.createRoute("mock_1")) }
+                                onStartMock = { 
+                                    val testId = "mock_${System.currentTimeMillis()}"
+                                    navController.navigate(Screen.Exam.createRoute(testId)) 
+                                },
+                                onNavigateToMistakes = { navController.navigate(Screen.Mistakes.route) },
+                                onNavigateToFlashcards = { navController.navigate(Screen.Flashcards.route) }
                             )
                         }
                         composable(Screen.Library.route) {
@@ -100,6 +107,14 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(Screen.Settings.route) {
                             SettingsScreen()
+                        }
+
+                        composable(Screen.Mistakes.route) {
+                            MistakeVaultScreen(onNavigateBack = { navController.navigateUp() })
+                        }
+
+                        composable(Screen.Flashcards.route) {
+                            FlashcardScreen(onNavigateBack = { navController.navigateUp() })
                         }
                         composable(Screen.Exam.route) { 
                             ExamScreen(

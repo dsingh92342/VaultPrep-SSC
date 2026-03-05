@@ -3,6 +3,8 @@ package com.example.vaultprepssc.ui.screens.dashboard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -25,9 +27,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun DashboardScreen(
     onNavigateToLibrary: () -> Unit,
     onStartMock: () -> Unit,
+    onNavigateToMistakes: () -> Unit,
+    onNavigateToFlashcards: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val recentSessions by viewModel.recentSessions.collectAsState()
+    val isOffline by viewModel.isOffline.collectAsState()
 
     Scaffold(
         topBar = {
@@ -52,8 +57,14 @@ fun DashboardScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                QuickStartSection(onNavigateToLibrary, onStartMock)
+                ZenStatusIndicator(isOffline)
+                Spacer(modifier = Modifier.height(20.dp))
+                QuickStartSection(
+                    onLibraryClick = onNavigateToLibrary, 
+                    onMockClick = onStartMock,
+                    onMistakesClick = onNavigateToMistakes,
+                    onFlashcardsClick = onNavigateToFlashcards
+                )
             }
 
             item {
@@ -69,7 +80,9 @@ fun DashboardScreen(
                     EmptyStateCard()
                 }
             } else {
-                // List of recent sessions would go here
+                items(recentSessions.take(5), key = { it.id }) { session ->
+                    SessionItem(session)
+                }
             }
             
             item {
@@ -82,28 +95,54 @@ fun DashboardScreen(
 @Composable
 fun QuickStartSection(
     onLibraryClick: () -> Unit,
-    onMockClick: () -> Unit
+    onMockClick: () -> Unit,
+    onMistakesClick: () -> Unit,
+    onFlashcardsClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        DashboardCard(
-            title = "Library",
-            subtitle = "PYQs & Topics",
-            icon = Icons.Default.LibraryBooks,
-            gradient = Brush.linearGradient(listOf(Color(0xFF3B82F6), Color(0xFF1D4ED8))),
-            modifier = Modifier.weight(1f),
-            onClick = onLibraryClick
-        )
-        DashboardCard(
-            title = "Mock Test",
-            subtitle = "Simulated Exam",
-            icon = Icons.Default.Psychology,
-            gradient = Brush.linearGradient(listOf(Color(0xFFF59E0B), Color(0xFFD97706))),
-            modifier = Modifier.weight(1f),
-            onClick = onMockClick
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            DashboardCard(
+                title = "Library",
+                subtitle = "PYQs & Topics",
+                icon = Icons.Default.LibraryBooks,
+                gradient = Brush.linearGradient(listOf(Color(0xFF3B82F6), Color(0xFF1D4ED8))),
+                modifier = Modifier.weight(1f),
+                onClick = onLibraryClick
+            )
+            DashboardCard(
+                title = "Mock Test",
+                subtitle = "Simulated Exam",
+                icon = Icons.Default.Psychology,
+                gradient = Brush.linearGradient(listOf(Color(0xFFF59E0B), Color(0xFFD97706))),
+                modifier = Modifier.weight(1f),
+                onClick = onMockClick
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            DashboardCard(
+                title = "Mistakes",
+                subtitle = "Review Errors",
+                icon = Icons.Default.Warning,
+                gradient = Brush.linearGradient(listOf(Color(0xFFEF4444), Color(0xFFB91C1C))),
+                modifier = Modifier.weight(1f),
+                onClick = onMistakesClick
+            )
+            DashboardCard(
+                title = "Flashcards",
+                subtitle = "Zen Memorization",
+                icon = Icons.Default.FlashOn,
+                gradient = Brush.linearGradient(listOf(Color(0xFF10B981), Color(0xFF047857))),
+                modifier = Modifier.weight(1f),
+                onClick = onFlashcardsClick
+            )
+        }
     }
 }
 
@@ -139,6 +178,72 @@ fun DashboardCard(
                 Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Text(subtitle, color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
             }
+        }
+    }
+}
+
+@Composable
+fun ZenStatusIndicator(isOffline: Boolean) {
+    Surface(
+        color = if (isOffline) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                if (isOffline) Icons.Default.SelfImprovement else Icons.Default.Warning,
+                contentDescription = null,
+                tint = if (isOffline) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    if (isOffline) "ZEN MODE ACTIVE" else "ONLINE MODE",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isOffline) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    if (isOffline) "Deep Work points are being banked." else "Go offline to eliminate distractions.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SessionItem(session: com.example.vaultprepssc.data.local.entity.TestSession) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("${(session.score.toFloat() / session.totalQuestions * 100).toInt()}%", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(session.testName, fontWeight = FontWeight.Bold)
+                Text("Score: ${session.score}/${session.totalQuestions}", style = MaterialTheme.typography.bodySmall)
+            }
+            Text(
+                java.text.SimpleDateFormat("dd MMM", java.util.Locale.getDefault()).format(session.timestamp),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline
+            )
         }
     }
 }

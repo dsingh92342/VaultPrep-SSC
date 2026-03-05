@@ -10,8 +10,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val repository: QuestionRepository
+    private val repository: QuestionRepository,
+    private val focusModeManager: com.example.vaultprepssc.util.FocusModeManager
 ) : ViewModel() {
+
+    val isOffline = focusModeManager.isOffline
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     val recentSessions = repository.getAllSessions()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

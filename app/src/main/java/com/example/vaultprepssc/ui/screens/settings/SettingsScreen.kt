@@ -8,11 +8,13 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import com.example.vaultprepssc.ui.screens.settings.SettingsViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -26,6 +28,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val isOffline by viewModel.isOffline.collectAsState()
+    val isPremium by viewModel.isPremium.collectAsState()
 
     Scaffold(
         topBar = {
@@ -45,7 +48,7 @@ fun SettingsScreen(
             }
 
             item {
-                PremiumCard()
+                PremiumCard(isPremium, onUnlock = { viewModel.purchasePremium() })
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -93,26 +96,49 @@ fun ZenStatusCard(isOffline: Boolean) {
 }
 
 @Composable
-fun PremiumCard() {
+fun PremiumCard(isPremium: Boolean, onUnlock: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        colors = CardDefaults.cardColors(
+            containerColor = if (isPremium) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.secondaryContainer
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Star, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                Icon(
+                    if (isPremium) Icons.Default.Verified else Icons.Default.Star, 
+                    contentDescription = null, 
+                    tint = if (isPremium) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Upgrade to Pro Vault", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                Text(
+                    if (isPremium) "Pro Vault Unlocked" else "Upgrade to Pro Vault", 
+                    fontWeight = FontWeight.Bold, 
+                    color = if (isPremium) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Unlock 10 years of PYQs and infinite mock generator.", style = MaterialTheme.typography.bodySmall)
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = { /* TODO: Unlock */ },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-            ) {
-                Text("ONE-TIME PURCHASE")
+            Text(
+                if (isPremium) "You have lifetime access to all PYQs and the infinite generator." else "Unlock 10 years of PYQs and infinite mock generator.", 
+                style = MaterialTheme.typography.bodySmall
+            )
+            
+            if (!isPremium) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = onUnlock,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Text("ONE-TIME PURCHASE")
+                }
+            } else {
+                Spacer(modifier = Modifier.height(12.dp))
+                AssistChip(
+                    onClick = { },
+                    label = { Text("LIFETIME LICENSE") },
+                    leadingIcon = { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                )
             }
         }
     }

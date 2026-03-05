@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
@@ -25,6 +28,8 @@ fun ExamScreen(
     val currentIndex by viewModel.currentQuestionIndex
     val timeLeft by viewModel.timerSeconds.collectAsState()
     val selectedOption by viewModel.selectedOption
+    val isFocusMode by viewModel.isFocusMode.collectAsState()
+    var showSubmitDialog by remember { mutableStateOf(false) }
 
     if (questions.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -39,7 +44,18 @@ fun ExamScreen(
         topBar = {
             TopAppBar(
                 title = { 
-                    TimerDisplay(timeLeft)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TimerDisplay(timeLeft)
+                        if (isFocusMode) {
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Icon(
+                                Icons.Default.SelfImprovement, 
+                                contentDescription = "Zen Mode",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onExit) {
@@ -50,7 +66,7 @@ fun ExamScreen(
                     IconButton(onClick = { /* TODO: Show Grid */ }) {
                         Icon(Icons.Default.GridView, contentDescription = "Jump to")
                     }
-                    TextButton(onClick = { /* TODO: Submit */ }) {
+                    TextButton(onClick = { showSubmitDialog = true }) {
                         Text("SUBMIT", fontWeight = FontWeight.Bold)
                     }
                 }
@@ -108,6 +124,31 @@ fun ExamScreen(
             OptionItem("C", currentQuestion.optionC, selectedOption == 2) { viewModel.selectOption(2) }
             OptionItem("D", currentQuestion.optionD, selectedOption == 3) { viewModel.selectOption(3) }
         }
+    }
+
+    if (showSubmitDialog) {
+        AlertDialog(
+            onDismissRequest = { showSubmitDialog = false },
+            title = { Text("Submit Test?") },
+            text = { Text("Are you sure you want to end this session and view your results?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.submitExam {
+                            showSubmitDialog = false
+                            onExit()
+                        }
+                    }
+                ) {
+                    Text("SUBMIT")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSubmitDialog = false }) {
+                    Text("CANCEL")
+                }
+            }
+        )
     }
 }
 

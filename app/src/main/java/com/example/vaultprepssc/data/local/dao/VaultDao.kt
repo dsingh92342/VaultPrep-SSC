@@ -12,6 +12,9 @@ interface VaultDao {
     @Query("SELECT * FROM questions")
     fun getAllQuestions(): Flow<List<Question>>
 
+    @Query("SELECT COUNT(*) FROM questions")
+    suspend fun getQuestionCount(): Int
+
     @Query("SELECT * FROM questions WHERE topicId = :topicId")
     fun getQuestionsByTopic(topicId: String): Flow<List<Question>>
 

@@ -34,4 +34,7 @@ class QuestionRepository @Inject constructor(
 
     fun getAllSessions(): Flow<List<TestSession>> = 
         vaultDao.getAllSessions()
+
+    fun getAttemptsForSession(sessionId: String): Flow<List<UserAttempt>> = 
+        vaultDao.getAttemptsForSession(sessionId)
 }

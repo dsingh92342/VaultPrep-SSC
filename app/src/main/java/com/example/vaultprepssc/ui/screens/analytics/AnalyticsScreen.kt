@@ -29,6 +29,15 @@ fun AnalyticsScreen(
 ) {
     val stats by viewModel.subjectStats.collectAsState()
     val totalSolved by viewModel.totalQuestionsSolved.collectAsState()
+    val globalAccuracy by viewModel.globalAccuracy.collectAsState()
+
+    val subjectNames = mapOf(
+        "math" to "Quantitative Aptitude",
+        "eng" to "English Language",
+        "gk" to "General Awareness",
+        "reason" to "Reasoning",
+        "mock" to "Full Mock Tests"
+    )
 
     Scaffold(
         topBar = {
@@ -58,7 +67,7 @@ fun AnalyticsScreen(
                     )
                     StatMiniCard(
                         "Accuracy",
-                        "85%", // Placeholder
+                        "${(globalAccuracy * 100).toInt()}%",
                         Icons.Default.Timeline,
                         MaterialTheme.colorScheme.secondary,
                         Modifier.weight(1f)
@@ -70,14 +79,17 @@ fun AnalyticsScreen(
                 Text("Subject Heatmap", style = MaterialTheme.typography.titleLarge)
             }
 
-            item {
-                HeatmapCard("Quantitative Aptitude", 0.75f)
-                Spacer(modifier = Modifier.height(8.dp))
-                HeatmapCard("English Language", 0.90f)
-                Spacer(modifier = Modifier.height(8.dp))
-                HeatmapCard("General Awareness", 0.45f)
-                Spacer(modifier = Modifier.height(8.dp))
-                HeatmapCard("Reasoning", 0.82f)
+            if (stats.isEmpty()) {
+                item {
+                    Text("No session data yet. Take a test to see your heatmap!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
+                }
+            } else {
+                item {
+                    stats.forEach { (code, progress) ->
+                        HeatmapCard(subjectNames[code] ?: code.replaceFirstChar { it.uppercase() }, progress.toFloat())
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
             }
             
             item {

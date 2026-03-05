@@ -26,6 +26,13 @@ class AnalyticsViewModel @Inject constructor(
     val totalQuestionsSolved = repository.getAllSessions()
         .map { it.sumOf { s -> s.totalQuestions } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val globalAccuracy = repository.getAllSessions()
+        .map { sessions ->
+            if (sessions.isEmpty()) 0.0
+            else sessions.sumOf { it.score }.toDouble() / sessions.sumOf { it.totalQuestions }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 }
 
 fun <T> List<T>.average(selector: (T) -> Double): Double {
