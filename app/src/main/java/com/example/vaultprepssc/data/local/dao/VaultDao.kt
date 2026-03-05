@@ -27,6 +27,9 @@ interface VaultDao {
     @Query("SELECT * FROM questions ORDER BY RANDOM() LIMIT :limit")
     fun getRandomQuestions(limit: Int): Flow<List<Question>>
 
+    @Query("SELECT * FROM questions WHERE subjectId = :subjectId ORDER BY RANDOM() LIMIT :limit")
+    fun getRandomQuestionsBySubject(subjectId: String, limit: Int): Flow<List<Question>>
+
     // Attempts
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAttempt(attempt: UserAttempt)

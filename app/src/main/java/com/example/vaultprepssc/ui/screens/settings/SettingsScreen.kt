@@ -29,6 +29,7 @@ fun SettingsScreen(
 ) {
     val isOffline by viewModel.isOffline.collectAsState()
     val isPremium by viewModel.isPremium.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Scaffold(
         topBar = {
@@ -48,7 +49,9 @@ fun SettingsScreen(
             }
 
             item {
-                PremiumCard(isPremium, onUnlock = { viewModel.purchasePremium() })
+                PremiumCard(isPremium, onUnlock = { 
+                    (context as? android.app.Activity)?.let { viewModel.startPremiumPurchase(it) }
+                })
                 Spacer(modifier = Modifier.height(16.dp))
             }
 

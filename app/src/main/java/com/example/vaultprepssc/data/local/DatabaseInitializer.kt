@@ -1,3 +1,5 @@
+package com.example.vaultprepssc.data.local
+
 import android.content.Context
 import com.example.vaultprepssc.data.local.entity.Question
 import com.example.vaultprepssc.data.local.dao.VaultDao

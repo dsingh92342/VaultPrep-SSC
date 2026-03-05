@@ -10,6 +10,7 @@ import androidx.room.Room
 import com.example.vaultprepssc.data.local.VaultDatabase
 import com.example.vaultprepssc.data.local.dao.VaultDao
 import com.example.vaultprepssc.util.Constants
+import com.example.vaultprepssc.util.SecurityManager
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 import javax.inject.Singleton
@@ -21,13 +22,13 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        securityManager: SecurityManager
     ): VaultDatabase {
         // Initialize SQLCipher
         SQLiteDatabase.loadLibs(context)
         
-        // Use a hardcoded passphrase for now, or fetch from secure storage in production
-        val passphrase = SQLiteDatabase.getBytes("vault_prep_passphrase".toCharArray())
+        val passphrase = SQLiteDatabase.getBytes(securityManager.getDatabasePassphrase().toCharArray())
         val factory = SupportFactory(passphrase)
         
         return Room.databaseBuilder(

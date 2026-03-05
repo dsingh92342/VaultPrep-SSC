@@ -27,10 +27,6 @@ class MockGenerator @Inject constructor(
     }
 
     private suspend fun fetchRandomBySubject(subjectId: String, limit: Int): List<Question> {
-        // VaultDao already has getRandomQuestions, but we need subject-specific filtering for balanced mocks
-        // Let's assume we'll add a specific query for this or filter from a larger set
-        // For now, we'll fetch all of a subject and take a random slice
-        val allSubQuestions = vaultDao.getAllQuestions().first().filter { it.subjectId == subjectId }
-        return allSubQuestions.shuffled().take(limit)
+        return vaultDao.getRandomQuestionsBySubject(subjectId, limit).first()
     }
 }
